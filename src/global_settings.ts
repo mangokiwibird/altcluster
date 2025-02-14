@@ -1,0 +1,1 @@
+export const IPFS_NODE_ID = "12D3KooWMjZDcEaFNDUqpEhSQj9N1P7QZFL1Mex71WoW2kmcF8K3" // todo: auto fetch from rpc client

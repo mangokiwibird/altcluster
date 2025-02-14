@@ -1,0 +1,17 @@
+{
+  "name": "altcluster",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "kubo-rpc-client": "^5.0.2",
+    "mqtt": "^5.10.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "undici": "^7.3.0"
+  },
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "type": "module"
+}
