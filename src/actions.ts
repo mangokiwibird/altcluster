@@ -1,6 +1,6 @@
 import { MqttClient } from "mqtt"
 import mqtt from "mqtt"
-import { fetch_file_ipfs, upload_file_ipfs } from "./ipfs.js";
+import { fetch_file_ipfs, upload_file_ipfs, download_file_ipfs } from "./ipfs.js";
 import { get_network_table_hash, NetworkTable, set_network_table_hash } from "./network_manager.js";
 import { IPFS_NODE_ID } from "./global_settings.js";
 
@@ -24,8 +24,14 @@ type PinDataFragmentSchema = {
 export class PinDataFragmentHandler implements EventHandler {
     name = AlclActions.PinDataFragment
 
-    async on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer): void {
-        if 
+    async on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer) {
+        if (target_action != this.name) return
+
+        let message = JSON.parse(raw_message.toString()) as PinDataFragmentSchema
+
+        let target_file_path = download_file_ipfs(message.CID)
+
+        console.log(`successfully pinned file from IPFS : ${target_file_path}`)
     }
 }
 
