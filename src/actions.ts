@@ -46,23 +46,49 @@ export class ReportIPChangeHandler implements EventHandler {
 
     async on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer) {
         if (target_action != this.name) return
+
+        console.log("handler triggered!")
         
-        let message = JSON.parse(raw_message.toString()) as ReportIPChangeSchema
-    
-        let network_table = JSON.parse(await fetch_file_ipfs(get_network_table_hash()).toString()) as NetworkTable
-        network_table[source_objective] = message.ip_address
+        const message = JSON.parse(raw_message.toString()) as ReportIPChangeSchema
+
+        console.log(message)
+
+        const table_cid_hash = get_network_table_hash()
+
+        let network_table = {} as NetworkTable
+
+        if (table_cid_hash != "") {
+            network_table = JSON.parse(await fetch_file_ipfs(table_cid_hash).toString()) as NetworkTable
+            network_table[source_objective] = message.ip_address
+            console.log("loaded network table from ipfs : ")
+            console.log(network_table)
+        } else {
+            console.log("network table initialized")
+        }
 
         const CID = await upload_file_ipfs(JSON.stringify(network_table))
 
+        console.log("uploaded network table to ipfs")
+
         local_client.publish(`alcl/${IPFS_NODE_ID}/${source_objective}/${target_action}`, CID)  // todo: it isn't consistent to just throw a string as an output
 
+        console.log("added output")
+
+        let is_success = false
         for (const [peer_id, peer_ip] of Object.entries(network_table)) {
-            broadcast_updated_network(peer_id, peer_ip, CID)
+            const res = broadcast_updated_network(peer_id, peer_ip, CID)
+
+            if (res) {
+                is_success = true
+                break
+            }
         }
+
+        console.log(`is_success: ${is_success}`)
     }
 }
 
-function broadcast_updated_network(peer_id: string, peer_ip: string, CID: string) {
+function broadcast_updated_network(peer_id: string, peer_ip: string, CID: string): boolean {
     try {
         const client = mqtt.connect(`mqtt://${peer_ip}`)
             
@@ -75,8 +101,10 @@ function broadcast_updated_network(peer_id: string, peer_ip: string, CID: string
         client.publish(`alcl/${IPFS_NODE_ID}/${peer_id}/${AlclActions.BroadcastUpdatedNetwork}`, JSON.stringify({ CID }))
 
         client.end()
+        return true
     } catch (e) {
         console.log(`failed to broadcast updated network: ${peer_id}/${peer_ip}`)
+        return false
     }
 }
 

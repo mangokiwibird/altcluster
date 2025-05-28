@@ -6,6 +6,8 @@ import { IPFS_NODE_ID } from "./global_settings.js"
 const EVENT_HANDLERS = [new ReportIPChangeHandler(), new BroadcastUpdatedNetworkHandler()]
 const local_client = mqtt.connect("mqtt://localhost")
 
+console.log(`IPFS_NODE_ID = ${IPFS_NODE_ID}`)
+
 // topic format: alcl/<from>/<to>/<action>
 local_client.on("connect", () => {
     local_client.subscribe(`alcl/+/${IPFS_NODE_ID}/+`, (err) => {
