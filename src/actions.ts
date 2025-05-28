@@ -9,11 +9,24 @@ import { IPFS_NODE_ID } from "./global_settings.js";
 export enum AlclActions {
     BroadcastUpdatedNetwork = "broadcast_updated_network",      // distributes the updated network as an ipfs hash
     ReportIPChange = "report_ip_change",                        // reports to a member of the network that the ip has changed
+    PinDataFragment = "pin_data_fragment"
 }
 
 export interface EventHandler {
     name: AlclActions
     on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer): void;
+}
+
+type PinDataFragmentSchema = {
+    CID: string
+}
+
+export class PinDataFragmentHandler implements EventHandler {
+    name = AlclActions.PinDataFragment
+
+    async on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer): void {
+        if 
+    }
 }
 
 // --- report_ip_change ---
