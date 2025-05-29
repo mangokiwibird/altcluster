@@ -166,6 +166,13 @@ export class BroadcastUpdatedNetworkHandler implements EventHandler {
         if (target_action != this.name) return
 
         let message = JSON.parse(raw_message.toString()) as BroadcastUpdatedNetworkScheme
-        set_network_table_hash(message.CID)
+        console.log("NEW TABLE HASH INPUT!")
+        set_network_table_hash(message.CID);
+
+        (async () => {
+            const buf = await fetch_file_ipfs(message.CID)
+            const string_buf = buf.toString('utf-8')
+            console.log(`actions.ts/broadcast_updated_network_handler : ${string_buf}`)
+        })()
     }
 }
