@@ -1,9 +1,9 @@
-import mqtt from "mqtt"
-import { BroadcastUpdatedNetworkHandler, ReportIPChangeHandler } from "./actions.js"
+import mqtt, { MqttClient } from "mqtt"
+import { BroadcastUpdatedNetworkHandler, PinDataFragmentHandler, ReportIPChangeHandler, SystemFetchFragmentHandler } from "./actions.js"
 import { IPFS_NODE_ID } from "./global_settings.js"
 
 
-const EVENT_HANDLERS = [new ReportIPChangeHandler(), new BroadcastUpdatedNetworkHandler()]
+const EVENT_HANDLERS = [new ReportIPChangeHandler(), new BroadcastUpdatedNetworkHandler(), new PinDataFragmentHandler(), new SystemFetchFragmentHandler()]
 const local_client = mqtt.connect("mqtt://localhost")
 
 console.log(`IPFS_NODE_ID = ${IPFS_NODE_ID}`)
@@ -13,6 +13,8 @@ local_client.on("connect", () => {
     local_client.subscribe(`alcl/+/${IPFS_NODE_ID}/+`, (err) => {
         if (err) console.log(err)
     })
+
+    main(local_client)
 })
 
 local_client.on("message", (topic, raw_message) => {
@@ -27,3 +29,6 @@ local_client.on("message", (topic, raw_message) => {
 
 console.log("application up and ready!")
 
+function main(local_client: MqttClient) {
+    // local_client("")
+}

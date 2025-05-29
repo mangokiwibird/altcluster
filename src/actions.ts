@@ -3,18 +3,57 @@ import mqtt from "mqtt"
 import { fetch_file_ipfs, upload_file_ipfs, download_file_ipfs } from "./ipfs.js";
 import { get_network_table_hash, NetworkTable, set_network_table_hash } from "./network_manager.js";
 import { IPFS_NODE_ID } from "./global_settings.js";
+import { getRandomElements } from "./util.js";
+
+const PERCENTAGE_DISTRIBUTION = 0.5
 
 
 // All action is defined based on the sender
 export enum AlclActions {
     BroadcastUpdatedNetwork = "broadcast_updated_network",      // distributes the updated network as an ipfs hash
     ReportIPChange = "report_ip_change",                        // reports to a member of the network that the ip has changed
-    PinDataFragment = "pin_data_fragment"
+    PinDataFragment = "pin_data_fragment",
+    SystemFetchFragment = "system_fetch_fragment"
 }
 
 export interface EventHandler {
     name: AlclActions
     on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer): void;
+}
+
+type SystemFetchFragmentSchema = {
+    CID: string
+}
+
+export class SystemFetchFragmentHandler implements EventHandler {
+    name = AlclActions.SystemFetchFragment
+
+    async on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer) {
+        if (target_action != this.name) return
+
+        let message = JSON.parse(raw_message.toString()) as SystemFetchFragmentSchema
+
+        const table_cid_hash = get_network_table_hash()
+
+        let network_table = {} as NetworkTable
+
+        if (table_cid_hash != "") {
+            const buf = await fetch_file_ipfs(table_cid_hash)
+            const string_buf = buf.toString('utf-8')
+            console.log("actions.ts/report_ip_change_handler : ")
+            console.log(string_buf)
+            console.log("-----")
+            network_table = JSON.parse(string_buf) as NetworkTable
+        }
+
+        const peers = Object.entries(network_table)
+
+        const randomPeers = getRandomElements(peers, Math.floor(PERCENTAGE_DISTRIBUTION * peers.length))
+        
+        for (const [peer_id, peer_ip] of randomPeers) {
+            broadcast_cid(peer_id, peer_ip, message.CID, AlclActions.PinDataFragment)
+        }
+    }
 }
 
 type PinDataFragmentSchema = {
@@ -81,7 +120,7 @@ export class ReportIPChangeHandler implements EventHandler {
         console.log("actions.ts/report_ip_change_handler : uploaded to mqtt")
 
         for (const [peer_id, peer_ip] of Object.entries(network_table)) {
-            const res = broadcast_updated_network(peer_id, peer_ip, CID)
+            const res = broadcast_cid(peer_id, peer_ip, CID, AlclActions.BroadcastUpdatedNetwork)
             console.log(`actions.ts/report_ip_change_handler : peer_id ${peer_id} / peer_ip ${peer_ip} / is_success ${res} `)
         }
 
@@ -89,14 +128,14 @@ export class ReportIPChangeHandler implements EventHandler {
     }
 }
 
-function broadcast_updated_network(peer_id: string, peer_ip: string, CID: string): boolean {
+function broadcast_cid(peer_id: string, peer_ip: string, CID: string, target: string): boolean {
     try {
         const client = mqtt.connect(`mqtt://${peer_ip}`)
 
         client.on("connect", () => {
             console.log("ready to publish")
 
-            client.publish(`alcl/${IPFS_NODE_ID}/${peer_id}/${AlclActions.BroadcastUpdatedNetwork}`, JSON.stringify({ CID }))
+            client.publish(`alcl/${IPFS_NODE_ID}/${peer_id}/${target}`, JSON.stringify({ CID }))
             
             console.log("publish success")
 
