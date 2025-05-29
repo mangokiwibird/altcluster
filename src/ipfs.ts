@@ -10,20 +10,24 @@ export async function get_ipfs_id(): Promise<string> {
 
 export async function fetch_file_ipfs(cidhash: string): Promise<Buffer> {
     const client = create()
-    let total = new Uint8Array()
+    let chunks = []
 
-    for await (const buf of client.get(CID.parse(cidhash))) {
-        total = Buffer.concat([total, buf])
+    for await (const buf of client.cat(CID.parse(cidhash))) {
+        console.log(`ipfs.ts/fetch_file_ipfs : ${cidhash}`)
+        chunks.push(buf)
     }
 
     client.pin.add(CID.parse(cidhash))
 
-    return Buffer.from(total.buffer)
+    return Buffer.concat(chunks)
 }
 
 export async function upload_file_ipfs(contents: string): Promise<string> {
     const client = create()
-    const { cid } = await client.add(contents)
+    const { cid } = await client.add({
+        content: Buffer.from(contents),
+    }, { wrapWithDirectory: false })
+    console.log(`ipfs.ts/upload_file_ipfs : ${cid.toString()}`)
     return cid.toString()
 }
 

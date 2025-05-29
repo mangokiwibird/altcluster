@@ -5,6 +5,7 @@ export type NetworkTable = {
 let table_hash = ""
 
 export function get_network_table_hash(): string {
+    console.log(`TABLE HASH : ${table_hash}`)
     return table_hash
 }
 
