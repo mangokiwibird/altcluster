@@ -92,7 +92,11 @@ function broadcast_updated_network(peer_id: string, peer_ip: string, CID: string
             })
         })
 
+        console.log("ready to publish")
+
         client.publish(`alcl/${IPFS_NODE_ID}/${peer_id}/${AlclActions.BroadcastUpdatedNetwork}`, JSON.stringify({ CID }))
+        
+        console.log("publish success")
 
         client.end()
         return true
