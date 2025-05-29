@@ -74,17 +74,11 @@ export class ReportIPChangeHandler implements EventHandler {
 
         console.log("added output")
 
-        let is_success = false
         for (const [peer_id, peer_ip] of Object.entries(network_table)) {
             const res = broadcast_updated_network(peer_id, peer_ip, CID)
-
-            if (res) {
-                is_success = true
-                break
-            }
         }
 
-        console.log(`is_success: ${is_success}`)
+        console.log(`?`)
     }
 }
 

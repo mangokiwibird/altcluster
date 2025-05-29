@@ -26,3 +26,4 @@ local_client.on("message", (topic, raw_message) => {
 })
 
 console.log("application up and ready!")
+

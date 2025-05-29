@@ -6,14 +6,14 @@
   "dependencies": {
     "kubo-rpc-client": "^5.0.2",
     "mqtt": "^5.10.3",
-    "tsx": "^4.19.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
     "undici": "^7.3.0",
     "uuid": "^11.1.0"
   },
   "scripts": {
-    "build": "tsc --build",
-    "start": "tsx src/index.ts"
+    "build": "ts-node --build",
+    "start": "node --loader ts-node/esm  src/index.ts"
   },
   "type": "module"
 }
