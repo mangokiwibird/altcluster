@@ -162,17 +162,15 @@ type BroadcastUpdatedNetworkScheme = {
 export class BroadcastUpdatedNetworkHandler implements EventHandler {
     name = AlclActions.BroadcastUpdatedNetwork
 
-    on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer) {
+    async on_event(local_client: MqttClient, source_objective: string, target_action: string, raw_message: Buffer) {
         if (target_action != this.name) return
 
         let message = JSON.parse(raw_message.toString()) as BroadcastUpdatedNetworkScheme
-        console.log("NEW TABLE HASH INPUT!")
+        console.log(`NEW TABLE HASH INPUT! - ${message.CID}`)
         set_network_table_hash(message.CID);
 
-        (async () => {
-            const buf = await fetch_file_ipfs(message.CID)
-            const string_buf = buf.toString('utf-8')
-            console.log(`actions.ts/broadcast_updated_network_handler : ${string_buf}`)
-        })()
+        const buf = await fetch_file_ipfs(message.CID)
+        const string_buf = buf.toString('utf-8')
+        console.log(`actions.ts/broadcast_updated_network_handler : ${string_buf}`)
     }
 }
