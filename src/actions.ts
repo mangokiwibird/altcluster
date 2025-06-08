@@ -38,7 +38,7 @@ export class SystemFetchFragmentHandler implements EventHandler {
         let network_table = {} as NetworkTable
 
         if (table_cid_hash != "") {
-            const buf = await fetch_file_ipfs(table_cid_hash)
+            const [buf, elapsed_time] = await fetch_file_ipfs(table_cid_hash)
             const string_buf = buf.toString('utf-8')
             console.log("actions.ts/report_ip_change_handler : ")
             console.log(string_buf)
@@ -70,9 +70,9 @@ export class PinDataFragmentHandler implements EventHandler {
 
         let message = JSON.parse(raw_message.toString()) as PinDataFragmentSchema
 
-        let target_file_path = download_file_ipfs(message.CID)
+        let [target_file_path, elapsed_time] = await download_file_ipfs(message.CID)
 
-        console.log(`successfully pinned file from IPFS : ${target_file_path}`)
+        console.log(`successfully pinned file from IPFS : ${target_file_path} / ${elapsed_time}ms`)
     }
 }
 
@@ -99,7 +99,7 @@ export class ReportIPChangeHandler implements EventHandler {
         let network_table = {} as NetworkTable
 
         if (table_cid_hash != "") {
-            const buf = await fetch_file_ipfs(table_cid_hash)
+            const [buf, elapsed_time] = await fetch_file_ipfs(table_cid_hash)
             const string_buf = buf.toString('utf-8')
             console.log("actions.ts/report_ip_change_handler : ")
             console.log(string_buf)

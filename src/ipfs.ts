@@ -8,7 +8,7 @@ export async function get_ipfs_id(): Promise<string> {
     return (await client.id()).id.toString()
 }
 
-export async function fetch_file_ipfs(cidhash: string): Promise<Buffer> {
+export async function fetch_file_ipfs(cidhash: string): Promise<[Buffer, number]> {
     const client = create()
     let chunks = []
 
@@ -32,7 +32,7 @@ export async function fetch_file_ipfs(cidhash: string): Promise<Buffer> {
     console.log("File Retrieved Success!")
     console.log('----------------------------------------------------')
 
-    return Buffer.concat(chunks)
+    return [Buffer.concat(chunks), elapsedMilliseconds]
 }
 
 export async function upload_file_ipfs(contents: string): Promise<string> {
@@ -44,10 +44,10 @@ export async function upload_file_ipfs(contents: string): Promise<string> {
     return cid.toString()
 }
 
-export async function download_file_ipfs(CID: string): Promise<string> {
-    const buffer = await fetch_file_ipfs(CID)
+export async function download_file_ipfs(CID: string): Promise<[string, number]> {
+    const [buffer, elapsed_time] = await fetch_file_ipfs(CID)
     fs.writeFileSync(`altcluster_pins/${CID}`, buffer)
-    return `altcluster_pins/${CID}`
+    return [`altcluster_pins/${CID}`, elapsed_time]
 }
 
 export async function add_file_ipfs(PATH: string): Promise<string> {
