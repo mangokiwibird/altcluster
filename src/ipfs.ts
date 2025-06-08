@@ -12,16 +12,25 @@ export async function fetch_file_ipfs(cidhash: string): Promise<Buffer> {
     const client = create()
     let chunks = []
 
-    console.log("File Retrieved Failed!")
+    console.log('----------------------------------------------------')
+    console.log(`CID: ${cidhash}`)
+    console.log("File Retrieved Started!")
+
+    const start = Date.now();
 
     for await (const buf of client.cat(CID.parse(cidhash))) {
         // console.log(`ipfs.ts/fetch_file_ipfs : ${cidhash}`)
         chunks.push(buf)
     }
 
+    const end = Date.now();
+    const elapsedMilliseconds = end - start;
+    console.log(`Elapsed milliseconds: ${elapsedMilliseconds}`);
+
     client.pin.add(CID.parse(cidhash))
 
     console.log("File Retrieved Success!")
+    console.log('----------------------------------------------------')
 
     return Buffer.concat(chunks)
 }
