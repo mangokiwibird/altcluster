@@ -1,6 +1,6 @@
 import { MqttClient } from "mqtt"
 import mqtt from "mqtt"
-import { fetch_file_ipfs, upload_file_ipfs, download_file_ipfs } from "./ipfs.js";
+import { fetch_file_ipfs, upload_file_ipfs, download_file_ipfs, add_file_ipfs } from "./ipfs.js";
 import { get_network_table_hash, NetworkTable, set_network_table_hash } from "./network_manager.js";
 import { IPFS_NODE_ID } from "./global_settings.js";
 import { getRandomElements } from "./util.js";
@@ -22,7 +22,7 @@ export interface EventHandler {
 }
 
 type SystemFetchFragmentSchema = {
-    CID: string
+    PATH: string
 }
 
 export class SystemFetchFragmentHandler implements EventHandler {
@@ -50,8 +50,10 @@ export class SystemFetchFragmentHandler implements EventHandler {
 
         const randomPeers = getRandomElements(peers, Math.floor(PERCENTAGE_DISTRIBUTION * peers.length))
         
+        const cid = await add_file_ipfs(message.PATH)
+        
         for (const [peer_id, peer_ip] of randomPeers) {
-            broadcast_cid(peer_id, peer_ip, message.CID, AlclActions.PinDataFragment)
+            broadcast_cid(peer_id, peer_ip, cid, AlclActions.PinDataFragment)
         }
     }
 }
@@ -169,8 +171,8 @@ export class BroadcastUpdatedNetworkHandler implements EventHandler {
         console.log(`NEW TABLE HASH INPUT! - ${message.CID}`)
         set_network_table_hash(message.CID);
 
-        const buf = await fetch_file_ipfs(message.CID)
-        const string_buf = buf.toString('utf-8')
-        console.log(`actions.ts/broadcast_updated_network_handler : ${string_buf}`)
+        // const buf = await fetch_file_ipfs(message.CID)
+        // const string_buf = buf.toString('utf-8')
+        // console.log(`actions.ts/broadcast_updated_network_handler : ${string_buf}`)
     }
 }
