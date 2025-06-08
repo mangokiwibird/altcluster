@@ -27,7 +27,7 @@ export async function fetch_file_ipfs(cidhash: string): Promise<Buffer> {
     const elapsedMilliseconds = end - start;
     console.log(`Elapsed milliseconds: ${elapsedMilliseconds}`);
 
-    client.pin.add(CID.parse(cidhash))
+    await client.pin.add(CID.parse(cidhash))
 
     console.log("File Retrieved Success!")
     console.log('----------------------------------------------------')
